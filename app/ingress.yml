@@ -1,0 +1,38 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingressvote
+  annotations:
+    traefik.ingress.kubernetes.io/router.middlewares: default-basicauth@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: default-myipwhitelist@kubernetescrd
+spec:
+  rules:
+  - host: "voteapp.distributeur-de-pain.best"
+    http:
+      paths:
+      - pathType: ImplementationSpecific
+        path: /
+        backend:
+          service:
+            name: clustvoteapp
+            port:
+              number: 80
+
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: basicauth
+spec:
+  basicAuth:
+    secret: authsecret
+    removeHeader: false
+---
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: myipwhitelist
+spec:
+  ipWhiteList:
+    sourceRange:
+      - "92.88.171.44"
